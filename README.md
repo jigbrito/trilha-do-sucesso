@@ -1,90 +1,103 @@
-# Trilha do Sucesso – Plataforma Educacional
+# Trilha do Sucesso – Education Platform
 
-Plataforma educacional full-stack moderna, intuitiva e responsiva desenvolvida para a **Trilha do Sucesso**, baseada na arquitetura e stack tecnológica do ecossistema **Grana Solidária**.
+A modern, intuitive, and responsive full-stack educational web application developed for **Trilha do Sucesso**, based on the technology stack and architectural patterns of the **Grana Solidária** ecosystem.
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## 🚀 Tech Stack
 
 * **Framework:** Next.js 14 (App Router) & React 18
-* **Linguagem:** TypeScript
-* **Estilização:** Tailwind CSS (com paleta oficial da Trilha do Sucesso: Azul `#3E64DE`, Dourado/Âmbar `#FFC107`, Ardósia `#1E293B`)
-* **Ícones:** Lucide React
-* **Banco de Dados:** PostgreSQL com Schema Dedicado (`trilha.*`) e Pool de conexões `pg`
-* **Autenticação:** Sessão JWT via cookies HTTP-only e hash de senhas com `bcrypt`
-* **Arquitetura de Segurança:** Validação e cálculo de notas exclusivamente no backend (gabarito protegido)
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS (with official Trilha do Sucesso brand palette: Royal Blue `#3E64DE`, Gold/Amber `#FFC107`, Slate `#1E293B`)
+* **Icons:** Lucide React
+* **Database:** PostgreSQL with Dedicated Schema (`trilha.*`) & `pg` connection pooling
+* **Authentication:** JWT sessions via HTTP-only cookies and secure password hashing with `bcrypt`
+* **Security Architecture:** Server-side grade calculation and validation (answer keys are strictly protected and never exposed to the client)
 
 ---
 
-## 📋 Credenciais Padrão (Ambiente de Teste)
+## 📋 Default Credentials (Testing Environment)
 
-Ao executar o seed inicial da base, os seguintes acessos são criados automaticamente:
+When running the initial database seed, the following test accounts are automatically provisioned:
 
-| Perfil | E-mail | Senha | Acesso / Painel |
+| Role | Email | Password | Dashboard Access |
 |---|---|---|---|
-| **Administrador** | `admin@trilhadosucesso.com.br` | `admin123` | `/admin/dashboard` |
-| **Estudante (Demo)** | `aluno@trilhadosucesso.com.br` | `aluno123` | `/aluno/dashboard` |
+| **Administrator** | `admin@trilhadosucesso.com.br` | `admin123` | `/admin/dashboard` |
+| **Student (Demo)** | `aluno@trilhadosucesso.com.br` | `aluno123` | `/aluno/dashboard` |
 
-> *Dica: Na tela de login (`/login`) há botões de preenchimento rápido em 1 clique para testar ambos os perfis instantaneamente.*
+> *Tip: On the login page (`/login`), there are 1-click demo buttons to quickly fill in credentials for both student and administrator accounts.*
 
 ---
 
-## 🛠️ Como Executar a Aplicação
+## 🛠️ Getting Started
 
-### 1. Instalação e Configuração
-As dependências já estão instaladas. As variáveis de ambiente estão configuradas em `.env.local`:
+### 1. Setup & Environment Variables
+Dependencies are managed via `package.json`. Configure your environment variables in `.env.local` (see `.env.example` for reference):
+
 ```bash
-POSTGRES_URL="sua_string_de_conexao_postgresql"
+POSTGRES_URL="your_postgresql_connection_string"
 DB_SCHEMA="trilha"
+NEXTAUTH_SECRET="your-secure-random-secret"
+NEXTAUTH_URL="http://localhost:3001"
+NEXT_PUBLIC_APP_URL="http://localhost:3001"
+NEXT_PUBLIC_GRANA_SOLIDARIA_URL="https://granasolidaria.com.br"
 PORT=3001
 ```
 
-### 2. Migração e Seed do Banco de Dados
-Para recriar o schema e popular os cursos iniciais com aulas e avaliações:
+### 2. Database Migration & Seeding
+To run database migrations and seed initial courses, video lessons, and quiz questions:
+
 ```bash
 npm run db:migrate
 npm run db:seed
 ```
 
-### 3. Execução em Modo de Desenvolvimento
+### 3. Development Mode
+Start the development server on port 3001:
+
 ```bash
 npm run dev
 ```
-Acesse: [http://localhost:3001](http://localhost:3001)
 
-### 4. Build de Produção
+Open [http://localhost:3001](http://localhost:3001) in your browser.
+
+### 4. Production Build
 ```bash
 npm run build
 npm run start
 ```
 
-### 5. Testes End-to-End
-Para executar a suíte de testes de ponta a ponta (login, matrícula, progresso de aulas, envio de prova, notas e admin):
+### 5. End-to-End Automated Testing
+Run the complete end-to-end integration test suite covering authentication, enrollment, video progress tracking, test submission, automated server-side grading, and admin analytics:
+
 ```bash
 node scripts/test-e2e.js
 ```
 
 ---
 
-## 🗄️ Estrutura do Banco de Dados (Schema `trilha`)
+## 🗄️ Database Architecture (Schema `trilha`)
 
-* `trilha.users`: Estudantes e Administradores com papéis e hashes de senha.
-* `trilha.courses`: Cursos publicados, categorias, carga horária e capas.
-* `trilha.lessons`: Grade de aulas em vídeo, descrição, duração e ordenação.
-* `trilha.user_lesson_progress`: Registro de aulas concluídas por cada aluno.
-* `trilha.user_course_progress`: Percentual de avanço do aluno em cada curso (0% a 100%).
-* `trilha.tests`: Avaliações finais com nota de corte para aprovação.
-* `trilha.questions`: Questões de múltipla escolha e pontuações.
-* `trilha.question_options`: Alternativas com gabarito `is_correct` (protegido no backend).
-* `trilha.submissions`: Provas realizadas com pontuação, percentual e status de aprovação.
-* `trilha.submission_answers`: Auditoria de cada questão respondida pelo aluno.
+The platform utilizes a dedicated schema to isolate educational records while remaining compatible with shared PostgreSQL instances:
+
+* `trilha.users`: Students and Administrators with roles, credentials, and contact info.
+* `trilha.courses`: Published courses, categories, levels, workload hours, and thumbnails.
+* `trilha.lessons`: Structured video lessons, descriptions, video URLs, durations, and order indices.
+* `trilha.user_lesson_progress`: Tracked completion status for each student and lesson.
+* `trilha.user_course_progress`: Real-time progress percentages (0% to 100%) and completed lesson counts per course.
+* `trilha.tests`: Course assessments with required passing scores (e.g., 70%) and time limits.
+* `trilha.questions`: Multiple-choice questions and point values.
+* `trilha.question_options`: Answer options with `is_correct` flags (guarded strictly on the server).
+* `trilha.submissions`: Student test submissions with scores, percentages, and pass/fail statuses.
+* `trilha.submission_answers`: Audit trail of individual answers submitted by students.
 
 ---
 
-## 🔄 Como Separar em um Banco de Dados Dedicado no Futuro
+## 🔄 Future Database Isolation
 
-A aplicação foi projetada para ser **100% desacoplada e independente**:
-1. Crie uma nova instância de banco de dados PostgreSQL (no Neon, Supabase ou provedor de sua preferência).
-2. No arquivo `.env.local`, substitua a variável `POSTGRES_URL` pela nova string de conexão.
-3. Execute `npm run db:migrate` e `npm run db:seed`.
-4. Pronto! A plataforma passa a rodar em seu próprio banco dedicado sem necessidade de alterar nenhuma linha de código.
+This platform is engineered to be **100% decoupled and independent**:
+
+1. Provision a new standalone PostgreSQL instance (on Neon, Supabase, AWS RDS, or any provider).
+2. Update the `POSTGRES_URL` in `.env.local` with the new connection string.
+3. Run `npm run db:migrate && npm run db:seed`.
+4. The platform will operate in its dedicated database without any application code changes.
