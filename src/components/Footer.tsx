@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { GraduationCap, Sparkles, ExternalLink, Mail, Shield, CheckCircle2 } from 'lucide-react';
+import Image from 'next/image';
+import { ExternalLink, Shield, CheckCircle2 } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -10,13 +11,15 @@ export function Footer() {
           {/* Brand Info */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-trilha-blue-500 flex items-center justify-center text-white">
-                <GraduationCap className="w-6 h-6" />
+              <div className="bg-white p-2 rounded-xl inline-block shadow-sm">
+                <Image
+                  src="/logo-trilha.png"
+                  alt="Trilha do Sucesso"
+                  width={160}
+                  height={50}
+                  className="h-8 w-auto object-contain"
+                />
               </div>
-              <span className="text-xl font-extrabold text-white flex items-center gap-1.5">
-                Trilha do Sucesso
-                <Sparkles className="w-4 h-4 text-trilha-gold-500 fill-trilha-gold-500" />
-              </span>
             </div>
             <p className="text-sm text-slate-400 max-w-md leading-relaxed">
               &quot;Nosso propósito é criar um ecossistema capaz de prover, de forma simultânea e integrada, 
