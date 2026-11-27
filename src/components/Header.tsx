@@ -1,286 +1,359 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { 
-  GraduationCap, 
-  BookOpen, 
-  Award, 
-  ShieldCheck, 
   User, 
-  LogOut, 
   Menu, 
   X, 
-  Sparkles,
-  LayoutDashboard
+  LayoutDashboard, 
+  LogOut, 
+  Award, 
+  ShieldCheck, 
+  BookOpen, 
+  ExternalLink,
+  ChevronDown
 } from 'lucide-react';
 
 export function Header() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
+  const isActive = (path: string) => {
+    if (path === '/') return pathname === '/';
+    return pathname.startsWith(path);
+  };
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsUserDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsUserDropdownOpen(false);
+  }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
-      {/* Top Banner Notice */}
-      <div className="bg-trilha-dark-900 text-slate-200 text-xs py-1.5 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-trilha-gold-500 text-slate-900">
-              NOVO
-            </span>
-            <span>Cursos 100% práticos, diretos e gratuitos com certificação.</span>
+    <header className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-gray-100">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 h-20 flex items-center justify-between">
+        
+        {/* Brand / Logo (Official Trilha do Sucesso Logo from trilhadosucesso.com.br) */}
+        <Link 
+          href="/" 
+          className="group flex items-center transition-transform duration-200 hover:scale-[1.02] active:scale-95"
+        >
+          <div className="flex items-center">
+            <Image 
+              src="/logo-trilha.png" 
+              alt="Trilha do Sucesso" 
+              width={220} 
+              height={70} 
+              className="h-10 sm:h-12 w-auto object-contain transition-all duration-300 group-hover:drop-shadow-[0_4px_12px_rgba(62,100,222,0.15)]" 
+              priority 
+            />
           </div>
-          <div className="hidden sm:flex items-center gap-4 text-slate-300">
-            <span>Ecossistema Integrado de Educação & Crédito</span>
-          </div>
-        </div>
-      </div>
+        </Link>
 
-      {/* Main Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-xl bg-trilha-blue-500 flex items-center justify-center text-white shadow-md shadow-trilha-blue-500/20 group-hover:scale-105 transition-transform">
-              <GraduationCap className="w-6 h-6" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
-                Trilha do Sucesso
-                <Sparkles className="w-4 h-4 text-trilha-gold-500 fill-trilha-gold-500" />
-              </span>
-              <span className="text-xs font-medium text-slate-500 tracking-wider uppercase">
-                Educação Empreendedora
-              </span>
-            </div>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-8">
+          <Link
+            href="/"
+            className={`text-sm font-medium transition-colors ${
+              pathname === '/' 
+                ? 'text-trilha-blue-600 font-semibold' 
+                : 'text-gray-600 hover:text-trilha-blue-600'
+            }`}
+          >
+            Início
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link
-              href="/"
-              className={`text-sm font-semibold transition-colors ${
-                pathname === '/' ? 'text-trilha-blue-500' : 'text-slate-600 hover:text-trilha-blue-500'
-              }`}
-            >
-              Início
-            </Link>
-            <Link
-              href="/cursos"
-              className={`text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-                isActive('/cursos') ? 'text-trilha-blue-500' : 'text-slate-600 hover:text-trilha-blue-500'
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              Catálogo de Cursos
-            </Link>
+          <Link
+            href="/cursos"
+            className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
+              isActive('/cursos') 
+                ? 'text-trilha-blue-600 font-semibold' 
+                : 'text-gray-600 hover:text-trilha-blue-600'
+            }`}
+          >
+            <BookOpen size={16} className="text-gray-400 group-hover:text-trilha-blue-600" />
+            <span>Cursos & Trilhas</span>
+          </Link>
 
-            {user && (
+          <a
+            href="https://granasolidaria.com.br"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-600 hover:text-trilha-blue-600 text-sm font-medium transition-colors flex items-center gap-1.5"
+          >
+            <span>Crédito para Empresas</span>
+            <ExternalLink size={13} className="text-gray-400" />
+          </a>
+
+          {user && (
+            <Link
+              href="/aluno/dashboard"
+              className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                isActive('/aluno') 
+                  ? 'text-trilha-blue-600 font-semibold' 
+                  : 'text-gray-600 hover:text-trilha-blue-600'
+              }`}
+            >
+              <LayoutDashboard size={16} />
+              <span>Área do Aluno</span>
+            </Link>
+          )}
+
+          {user?.isAdmin && (
+            <Link
+              href="/admin/dashboard"
+              className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                isActive('/admin') 
+                  ? 'text-indigo-600 font-semibold' 
+                  : 'text-indigo-600/80 hover:text-indigo-700'
+              }`}
+            >
+              <ShieldCheck size={16} />
+              <span>Admin</span>
+            </Link>
+          )}
+        </nav>
+
+        {/* Right Section: Auth & Actions */}
+        <div className="hidden md:flex items-center gap-4">
+          {user ? (
+            <div className="flex items-center gap-3">
+              {/* Quick direct button to user's dashboard */}
               <Link
-                href="/aluno/dashboard"
-                className={`text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-                  isActive('/aluno') ? 'text-trilha-blue-500' : 'text-slate-600 hover:text-trilha-blue-500'
+                href={user.isAdmin ? "/admin/dashboard" : "/aluno/dashboard"}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm ${
+                  user.isAdmin
+                    ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-100'
+                    : 'bg-blue-50 text-trilha-blue-600 hover:bg-blue-100 border border-blue-100'
                 }`}
               >
-                <LayoutDashboard className="w-4 h-4" />
-                Área do Aluno
+                {user.isAdmin ? <ShieldCheck size={16} /> : <LayoutDashboard size={16} />}
+                <span>{user.isAdmin ? "Painel Admin" : "Meu Painel"}</span>
               </Link>
-            )}
 
-            {user?.isAdmin && (
-              <Link
-                href="/admin/dashboard"
-                className={`text-sm font-semibold transition-colors flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100`}
-              >
-                <ShieldCheck className="w-4 h-4" />
-                Painel Admin
-              </Link>
-            )}
-          </nav>
-
-          {/* Right Section: Auth buttons or User Profile */}
-          <div className="hidden md:flex items-center gap-4">
-            {user ? (
-              <div className="relative">
+              {/* User Dropdown */}
+              <div className="relative" ref={dropdownRef}>
                 <button
                   type="button"
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all text-left"
                 >
-                  <div className="w-8 h-8 rounded-full bg-trilha-blue-500 text-white flex items-center justify-center font-bold text-sm">
+                  <div className="w-8 h-8 rounded-full bg-trilha-blue-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-slate-800 leading-tight">{user.name}</p>
-                    <p className="text-[11px] text-slate-500 leading-tight">
-                      {user.isAdmin ? 'Administrador' : 'Estudante'}
-                    </p>
-                  </div>
+                  <span className="text-xs font-semibold text-gray-700 max-w-[100px] truncate">
+                    {user.name.split(' ')[0]}
+                  </span>
+                  <ChevronDown size={14} className="text-gray-400" />
                 </button>
 
-                {userDropdownOpen && (
-                  <div 
-                    className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50"
-                    onMouseLeave={() => setUserDropdownOpen(false)}
-                  >
-                    <div className="px-4 py-2 border-b border-slate-100">
-                      <p className="text-xs text-slate-500">Conectado como</p>
-                      <p className="text-sm font-semibold text-slate-900 truncate">{user.email}</p>
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                        {user.isAdmin ? 'Administrador' : 'Aluno'}
+                      </p>
+                      <p className="text-sm font-bold text-gray-900 truncate mt-0.5">{user.name}</p>
+                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
                     </div>
 
-                    <Link
-                      href="/aluno/dashboard"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-slate-400" />
-                      Meu Painel de Estudos
-                    </Link>
-
-                    <Link
-                      href="/aluno/notas"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
-                    >
-                      <Award className="w-4 h-4 text-slate-400" />
-                      Minhas Notas & Avaliações
-                    </Link>
-
-                    {user.isAdmin && (
+                    <div className="py-1">
                       <Link
-                        href="/admin/dashboard"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-indigo-700 bg-indigo-50/50 hover:bg-indigo-50"
+                        href="/aluno/dashboard"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-trilha-blue-600 transition-colors"
                       >
-                        <ShieldCheck className="w-4 h-4 text-indigo-500" />
-                        Gestão do Sistema (Admin)
+                        <LayoutDashboard size={16} className="text-gray-400" />
+                        <span>Meu Painel de Estudos</span>
                       </Link>
-                    )}
 
-                    <div className="border-t border-slate-100 mt-2 pt-2">
+                      <Link
+                        href="/aluno/notas"
+                        onClick={() => setIsUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:text-trilha-blue-600 transition-colors"
+                      >
+                        <Award size={16} className="text-gray-400" />
+                        <span>Minhas Notas & Avaliações</span>
+                      </Link>
+
+                      {user.isAdmin && (
+                        <Link
+                          href="/admin/dashboard"
+                          onClick={() => setIsUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50/50 hover:bg-indigo-50 transition-colors"
+                        >
+                          <ShieldCheck size={16} className="text-indigo-500" />
+                          <span>Painel Administrativo</span>
+                        </Link>
+                      )}
+                    </div>
+
+                    <div className="border-t border-gray-100 pt-1 mt-1">
                       <button
                         type="button"
                         onClick={() => {
-                          setUserDropdownOpen(false);
+                          setIsUserDropdownOpen(false);
                           logout();
                         }}
-                        className="flex items-center gap-2.5 w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50"
+                        className="flex items-center gap-2.5 w-full text-left px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
                       >
-                        <LogOut className="w-4 h-4" />
-                        Sair da Conta
+                        <LogOut size={16} />
+                        <span>Sair da conta</span>
                       </button>
                     </div>
                   </div>
                 )}
               </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link
+                href="/login"
+                className="flex items-center gap-2 text-gray-700 hover:text-trilha-blue-600 font-semibold text-sm transition-colors py-2 px-3 rounded-lg hover:bg-gray-50"
+              >
+                <User size={18} className="text-trilha-blue-500" />
+                <span>Login</span>
+              </Link>
+              <Link
+                href="/cadastro"
+                className="flex items-center justify-center px-5 py-2.5 bg-trilha-blue-500 hover:bg-trilha-blue-600 text-white rounded-xl font-semibold shadow-md shadow-trilha-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all text-sm"
+              >
+                Comece Grátis
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          type="button"
+          className="md:hidden p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Abrir Menu"
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Drawer Navigation (exact Grana Solidária style) */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-100 p-5 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex flex-col space-y-4">
+            <Link
+              href="/"
+              className={`text-sm font-medium transition-colors ${
+                pathname === '/' ? 'text-trilha-blue-600 font-bold' : 'text-gray-700'
+              }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Início
+            </Link>
+
+            <Link
+              href="/cursos"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/cursos') ? 'text-trilha-blue-600 font-bold' : 'text-gray-700'
+              }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Catálogo de Cursos
+            </Link>
+
+            <a
+              href="https://granasolidaria.com.br"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-700 hover:text-trilha-blue-600 text-sm font-medium transition-colors flex items-center justify-between"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span>Crédito para Empresas</span>
+              <ExternalLink size={14} className="text-gray-400" />
+            </a>
+
+            <hr className="border-gray-100 my-2" />
+
+            {user ? (
+              <div className="flex flex-col space-y-3 pt-1">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                  <div className="w-9 h-9 rounded-full bg-trilha-blue-500 text-white flex items-center justify-center font-bold text-sm">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-gray-900 truncate">{user.name}</p>
+                    <p className="text-[11px] text-gray-500 truncate">{user.email}</p>
+                  </div>
+                </div>
+
+                <Link
+                  href={user.isAdmin ? "/admin/dashboard" : "/aluno/dashboard"}
+                  className="flex items-center gap-2 text-trilha-blue-600 font-bold text-sm py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {user.isAdmin ? <ShieldCheck size={18} /> : <LayoutDashboard size={18} />}
+                  <span>{user.isAdmin ? "Painel Admin" : "Meu Painel de Estudos"}</span>
+                </Link>
+
+                <Link
+                  href="/aluno/notas"
+                  className="flex items-center gap-2 text-gray-700 font-medium text-sm py-1"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Award size={18} className="text-gray-400" />
+                  <span>Minhas Notas & Avaliações</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    logout();
+                  }}
+                  className="flex items-center gap-2 text-rose-600 font-semibold text-sm pt-2 text-left"
+                >
+                  <LogOut size={18} />
+                  <span>Sair da conta</span>
+                </button>
+              </div>
             ) : (
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col space-y-3 pt-1">
                 <Link
                   href="/login"
-                  className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-trilha-blue-500 transition-colors"
+                  className="flex items-center justify-center gap-2 py-2.5 text-gray-700 hover:text-trilha-blue-600 font-semibold text-sm border border-gray-200 rounded-xl"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Entrar
+                  <User size={18} />
+                  <span>Login</span>
                 </Link>
                 <Link
                   href="/cadastro"
-                  className="px-5 py-2.5 text-sm font-bold text-white bg-trilha-blue-500 hover:bg-trilha-blue-600 rounded-xl shadow-md shadow-trilha-blue-500/20 transition-all hover:scale-[1.02] active:scale-95"
+                  className="flex items-center justify-center px-4 py-2.5 bg-trilha-blue-500 text-white rounded-xl font-semibold shadow-md shadow-trilha-blue-500/20 text-sm"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Cadastre-se Grátis
+                  Comece Grátis
                 </Link>
               </div>
             )}
           </div>
-
-          {/* Mobile Menu Button */}
-          <div className="flex md:hidden">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-600 hover:text-slate-900"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-slate-200 px-4 pt-3 pb-6 space-y-3">
-          <Link
-            href="/"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
-          >
-            Início
-          </Link>
-          <Link
-            href="/cursos"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
-          >
-            Catálogo de Cursos
-          </Link>
-          {user ? (
-            <>
-              <Link
-                href="/aluno/dashboard"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
-              >
-                Área do Aluno
-              </Link>
-              <Link
-                href="/aluno/notas"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
-              >
-                Minhas Notas
-              </Link>
-              {user.isAdmin && (
-                <Link
-                  href="/admin/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2 text-base font-semibold text-indigo-700 bg-indigo-50 rounded-lg"
-                >
-                  Painel Administrativo
-                </Link>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  logout();
-                }}
-                className="w-full text-left px-3 py-2 text-base font-semibold text-rose-600 hover:bg-rose-50 rounded-lg"
-              >
-                Sair da conta
-              </button>
-            </>
-          ) : (
-            <div className="pt-2 space-y-2">
-              <Link
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-center py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 rounded-xl"
-              >
-                Entrar
-              </Link>
-              <Link
-                href="/cadastro"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-center py-2.5 text-sm font-bold text-white bg-trilha-blue-500 rounded-xl"
-              >
-                Cadastre-se Grátis
-              </Link>
-            </div>
-          )}
         </div>
       )}
     </header>
